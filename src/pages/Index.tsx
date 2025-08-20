@@ -1,11 +1,28 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Header } from "@/components/layout/Header";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { GamePanel } from "@/components/panels/GamePanel";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <Header />
+      
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel - Chat Interface */}
+        <div className="w-1/2 border-r border-border/50 bg-card/20 backdrop-blur">
+          <ChatInterface />
+        </div>
+        
+        {/* Right Panel - Game Panel */}
+        <div className="w-1/2 bg-card/10 backdrop-blur">
+          <GamePanel />
+        </div>
+      </div>
+      
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 opacity-5 cyber-grid"></div>
+        <div className="absolute inset-0 scan-lines"></div>
       </div>
     </div>
   );
