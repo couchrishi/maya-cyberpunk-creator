@@ -220,7 +220,7 @@ export function GamePanel() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
             const seconds = (elapsed % 60).toString().padStart(2, '0');
-            document.getElementById('timer').textContent = \`\${minutes}:\${seconds}\`;
+            document.getElementById('timer').textContent = minutes + ':' + seconds;
         }, 1000);
         
         // Initialize game
@@ -286,6 +286,8 @@ export function GamePanel() {
                   srcDoc={sampleCode}
                   className="w-full h-full border-0"
                   title="Game Preview"
+                  sandbox="allow-scripts"
+                  style={{ backgroundColor: '#0f172a' }}
                 />
               </div>
             </CardContent>
