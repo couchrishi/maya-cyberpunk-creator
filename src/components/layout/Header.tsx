@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Zap, Settings, Share, User, Menu } from "lucide-react";
 
 export function Header() {
-  console.log("Header component rendering");
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {

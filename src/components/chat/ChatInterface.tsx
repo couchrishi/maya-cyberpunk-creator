@@ -19,7 +19,6 @@ interface GamePlan {
 }
 
 export function ChatInterface() {
-  console.log("ChatInterface component rendering");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -32,6 +31,9 @@ export function ChatInterface() {
   const [gamePlan, setGamePlan] = useState<GamePlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Backend API configuration - update this with your backend URL
+  const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3000/api';
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -43,48 +45,83 @@ export function ChatInterface() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const plan: GamePlan = {
-        title: "Memory Card Game",
-        description: "A classic memory matching game with colorful cards. Players flip cards to find matching pairs.",
-        codeSnippet: `// Simple Memory Game Setup
-const cards = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎪', '🎨'];
-const gameBoard = document.getElementById('gameBoard');
+    try {
+      // Call your backend API
+      const response = await fetch(`${API_BASE_URL}/generate-game`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: currentInput,
+          conversation_history: messages
+        }),
+      });
 
-function createCard(symbol, index) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.dataset.symbol = symbol;
-  card.dataset.index = index;
-  return card;
-}`,
-        nextSteps: [
-          "Add card flip animations",
-          "Implement matching logic",
-          "Add score tracking",
-          "Create win condition"
-        ]
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Expected response format from your backend:
+      // {
+      //   title: string,
+      //   description: string,
+      //   code: string, // Full HTML/JS/CSS code for the game
+      //   nextSteps: string[]
+      // }
+
+      const plan: GamePlan = {
+        title: data.title,
+        description: data.description,
+        codeSnippet: data.code,
+        nextSteps: data.nextSteps || []
       };
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: `Great idea! I'll help you create a ${plan.title}. Here's the plan:
+        content: `Great idea! I'll help you create "${data.title}". Here's the plan:
 
-${plan.description}
+${data.description}
 
-I've generated the initial code structure for you. You can see it in the Code tab on the right. Ready for the next step?`,
+I've generated the code for you. You can see it in the Preview and Code tabs on the right. Ready for the next step?`,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
       setGamePlan(plan);
+      
+      // Dispatch custom event to update game panel
+      window.dispatchEvent(new CustomEvent('gameGenerated', { 
+        detail: { 
+          code: data.code,
+          title: data.title,
+          description: data.description 
+        } 
+      }));
+
+    } catch (error) {
+      console.error('Error calling backend:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: `Sorry, I'm having trouble connecting to the game generation service. Please check that your backend is running at ${API_BASE_URL} or update the API_BASE_URL in the code.
+
+Error: ${error.message}`,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleNextStep = (step: string) => {

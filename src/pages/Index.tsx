@@ -3,7 +3,6 @@ import { ChatInterface } from "@/components/chat/ChatInterface";
 import { GamePanel } from "@/components/panels/GamePanel";
 
 const Index = () => {
-  console.log("Index component rendering");
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <Header />
