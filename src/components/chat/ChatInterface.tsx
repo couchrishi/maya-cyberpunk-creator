@@ -19,6 +19,7 @@ interface GamePlan {
 }
 
 export function ChatInterface() {
+  console.log("ChatInterface component rendering");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',

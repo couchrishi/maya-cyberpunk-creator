@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Download, Share, Image, Code, Eye } from "lucide-react";
 
 export function GamePanel() {
+  console.log("GamePanel component rendering");
   const [activeTab, setActiveTab] = useState("preview");
 
   const sampleCode = `<!DOCTYPE html>
