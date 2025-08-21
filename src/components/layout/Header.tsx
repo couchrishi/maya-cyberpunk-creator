@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Settings, Share, User, Menu } from "lucide-react";
+import mayaLogo from "@/assets/maya-logo.jpg";
 
 export function Header() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -17,7 +18,14 @@ export function Header() {
     <header className="h-16 bg-card/80 backdrop-blur border-b border-border/50 px-6 flex items-center justify-between relative scan-lines">
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary shadow-[var(--shadow-cyber)] flex items-center justify-center overflow-hidden">
+          <div 
+            className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary shadow-[var(--shadow-cyber)] flex items-center justify-center overflow-hidden"
+            style={{
+              backgroundImage: `url(${mayaLogo})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
             <span className="text-background font-orbitron font-black text-sm">M</span>
           </div>
           <div>

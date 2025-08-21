@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,19 +6,6 @@ import { Play, Download, Share, Image, Code, Eye } from "lucide-react";
 
 export function GamePanel() {
   const [activeTab, setActiveTab] = useState("preview");
-  const [gameCode, setGameCode] = useState("");
-
-  // Listen for game generation events
-  useEffect(() => {
-    const handleGameGenerated = (event: CustomEvent) => {
-      setGameCode(event.detail.code);
-    };
-
-    window.addEventListener('gameGenerated', handleGameGenerated as EventListener);
-    return () => {
-      window.removeEventListener('gameGenerated', handleGameGenerated as EventListener);
-    };
-  }, []);
 
   const sampleCode = `<!DOCTYPE html>
 <html lang="en">
@@ -296,7 +283,7 @@ export function GamePanel() {
             <CardContent className="h-[calc(100%-80px)]">
               <div className="w-full h-full bg-gradient-to-br from-background to-muted/20 rounded-lg border border-border/50 overflow-hidden">
                 <iframe
-                  srcDoc={gameCode || sampleCode}
+                  srcDoc={sampleCode}
                   className="w-full h-full border-0"
                   title="Game Preview"
                   sandbox="allow-scripts"
@@ -364,9 +351,9 @@ export function GamePanel() {
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
               <div className="h-full bg-muted/10 rounded-lg border border-accent/20 overflow-auto">
-                 <pre className="p-4 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
-                   {gameCode || sampleCode}
-                 </pre>
+                <pre className="p-4 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
+                  {sampleCode}
+                </pre>
               </div>
             </CardContent>
           </Card>
