@@ -18,16 +18,20 @@ interface GamePlan {
   nextSteps: string[];
 }
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  initialPrompt?: string;
+}
+
+export function ChatInterface({ initialPrompt }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       type: 'assistant',
-      content: 'Hey there! I\'m Maya, your AI game creation companion. Describe the game you want to build and I\'ll help you bring it to life with code. What kind of game are you thinking of?',
+      content: 'Hey there! I\'m Maya, your AI game creation companion. Ready to bring your game idea to life? I\'ll generate the code and help you iterate on your concept.',
       timestamp: new Date()
     }
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(initialPrompt || '');
   const [gamePlan, setGamePlan] = useState<GamePlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 

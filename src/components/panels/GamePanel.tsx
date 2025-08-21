@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Download, Share, Image, Code, Eye } from "lucide-react";
+import { Play, Download, Share, Image, Code, Eye, Gamepad2 } from "lucide-react";
 
 export function GamePanel() {
   const [activeTab, setActiveTab] = useState("preview");
+  const [gameCode, setGameCode] = useState<string | null>(null);
 
-  const sampleCode = `<!DOCTYPE html>
+  // Empty state when no game is generated yet
+  const emptyState = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -282,13 +284,32 @@ export function GamePanel() {
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
               <div className="w-full h-full bg-gradient-to-br from-background to-muted/20 rounded-lg border border-border/50 overflow-hidden">
-                <iframe
-                  srcDoc={sampleCode}
-                  className="w-full h-full border-0"
-                  title="Game Preview"
-                  sandbox="allow-scripts"
-                  style={{ backgroundColor: '#0f172a' }}
-                />
+                {gameCode ? (
+                  <iframe
+                    srcDoc={gameCode}
+                    className="w-full h-full border-0"
+                    title="Game Preview"
+                    sandbox="allow-scripts"
+                    style={{ backgroundColor: '#0f172a' }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 mx-auto bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
+                        <Gamepad2 className="w-8 h-8 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-orbitron font-bold text-lg text-primary mb-2">
+                          Ready to Create
+                        </h3>
+                        <p className="text-sm text-muted-foreground max-w-xs">
+                          Your game will appear here once Maya generates the code. 
+                          Start by describing your game idea in the chat.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -351,9 +372,25 @@ export function GamePanel() {
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
               <div className="h-full bg-muted/10 rounded-lg border border-accent/20 overflow-auto">
-                <pre className="p-4 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
-                  {sampleCode}
-                </pre>
+                {gameCode ? (
+                  <pre className="p-4 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
+                    {gameCode}
+                  </pre>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center space-y-3">
+                      <Code className="w-12 h-12 mx-auto text-accent/50" />
+                      <div>
+                        <h4 className="font-orbitron font-bold text-accent mb-1">
+                          No Code Yet
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          Game code will appear here after generation
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
