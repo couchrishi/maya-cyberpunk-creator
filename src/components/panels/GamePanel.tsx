@@ -3,10 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Download, Share, Image, Code, Eye, Gamepad2 } from "lucide-react";
+import { useGame } from "@/contexts/GameContext";
 
 export function GamePanel() {
+  const { gameState } = useGame();
   const [activeTab, setActiveTab] = useState("preview");
-  const [gameCode, setGameCode] = useState<string | null>(null);
 
   // Empty state when no game is generated yet
   const emptyState = `<!DOCTYPE html>
@@ -284,14 +285,85 @@ export function GamePanel() {
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
               <div className="w-full h-full bg-gradient-to-br from-background to-muted/20 rounded-lg border border-border/50 overflow-hidden">
-                {gameCode ? (
+                {gameState.isGenerating && gameState.operationType === 'game_creation' ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 mx-auto bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <div>
+                        <h3 className="font-orbitron font-bold text-lg text-primary mb-2">
+                          {gameState.status === 'thinking' ? 'Planning Your Game' : 'Generating Code'}
+                        </h3>
+                        <p className="text-sm text-muted-foreground max-w-xs">
+                          Maya is creating your game. This may take a minute...
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : gameState.code?.html ? (
                   <iframe
-                    srcDoc={gameCode}
+                    srcDoc={(() => {
+                      // Combine HTML, CSS, and JS into a complete document
+                      const html = gameState.code.html;
+                      const css = gameState.code.css || '';
+                      const js = gameState.code.js || '';
+                      
+                      console.log('Preview HTML:', html?.slice(0, 100));
+                      console.log('Preview CSS:', css?.slice(0, 100));  
+                      console.log('Preview JS:', js?.slice(0, 100));
+                      
+                      // If HTML already contains <style> and <script> tags, use as-is
+                      if (html.includes('<style>') && html.includes('<script>')) {
+                        console.log('Using complete HTML as-is');
+                        return html;
+                      }
+                      
+                      // Otherwise, inject CSS and JS into the HTML
+                      let completeHTML = html;
+                      
+                      // Add CSS if provided and not already present
+                      if (css && !html.includes('<style>')) {
+                        completeHTML = completeHTML.replace(
+                          '</head>',
+                          `<style>${css}</style></head>`
+                        );
+                        console.log('Added CSS to HTML');
+                      }
+                      
+                      // Add JS if provided and not already present
+                      if (js && !html.includes('<script>')) {
+                        completeHTML = completeHTML.replace(
+                          '</body>',
+                          `<script>${js}</script></body>`
+                        );
+                        console.log('Added JS to HTML');
+                      }
+                      
+                      console.log('Final HTML length:', completeHTML.length);
+                      return completeHTML;
+                    })()}
                     className="w-full h-full border-0"
                     title="Game Preview"
-                    sandbox="allow-scripts"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                     style={{ backgroundColor: '#0f172a' }}
                   />
+                ) : gameState.status === 'error' ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 mx-auto bg-gradient-to-r from-destructive/20 to-destructive/30 rounded-lg flex items-center justify-center">
+                        <span className="text-2xl">❌</span>
+                      </div>
+                      <div>
+                        <h3 className="font-orbitron font-bold text-lg text-destructive mb-2">
+                          Generation Failed
+                        </h3>
+                        <p className="text-sm text-muted-foreground max-w-xs">
+                          {gameState.error || 'Something went wrong. Please try again.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center space-y-4">
@@ -371,13 +443,84 @@ export function GamePanel() {
               </div>
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
-              <div className="h-full bg-muted/10 rounded-lg border border-accent/20 overflow-auto">
-                {gameCode ? (
-                  <pre className="p-4 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
-                    {gameCode}
-                  </pre>
+              <div className="h-full bg-muted/10 rounded-lg border border-accent/20 relative">
+                {gameState.codeStream.isStreaming && gameState.codeStream.content ? (
+                  <div className="absolute inset-0 overflow-auto p-0">
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-center gap-2 text-xs text-accent border-b border-accent/20 pb-2">
+                        <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                        <span className="font-medium">Streaming Code - {gameState.codeStream.currentType.toUpperCase()}</span>
+                      </div>
+                      <pre className="text-xs font-mono text-foreground/90 whitespace-pre-wrap">
+                        <code>{gameState.codeStream.content}</code>
+                      </pre>
+                    </div>
+                  </div>
+                ) : (gameState.isGenerating && gameState.operationType === 'game_creation') ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center space-y-3">
+                      <div className="w-12 h-12 mx-auto border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                      <div>
+                        <h4 className="font-orbitron font-bold text-accent mb-1">
+                          Generating Code
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          Creating your game code...
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : gameState.code?.html ? (
+                  <div className="absolute inset-0 overflow-auto p-0">
+                    <pre className="p-4 m-0 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
+                    {(() => {
+                      // Show the complete combined HTML code
+                      const html = gameState.code.html;
+                      const css = gameState.code.css || '';
+                      const js = gameState.code.js || '';
+                      
+                      // If HTML already contains <style> and <script> tags, use as-is
+                      if (html.includes('<style>') && html.includes('<script>')) {
+                        return html;
+                      }
+                      
+                      // Otherwise, combine for display
+                      let completeHTML = html;
+                      
+                      if (css && !html.includes('<style>')) {
+                        completeHTML = completeHTML.replace(
+                          '</head>',
+                          `<style>${css}</style></head>`
+                        );
+                      }
+                      
+                      if (js && !html.includes('<script>')) {
+                        completeHTML = completeHTML.replace(
+                          '</body>',
+                          `<script>${js}</script></body>`
+                        );
+                      }
+                      
+                      return completeHTML;
+                    })()}
+                    </pre>
+                  </div>
+                ) : gameState.status === 'error' ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center space-y-3">
+                      <span className="text-4xl">💥</span>
+                      <div>
+                        <h4 className="font-orbitron font-bold text-destructive mb-1">
+                          Code Generation Failed
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {gameState.error || 'Unable to generate code'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <div className="flex items-center justify-center h-full">
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center space-y-3">
                       <Code className="w-12 h-12 mx-auto text-accent/50" />
                       <div>
